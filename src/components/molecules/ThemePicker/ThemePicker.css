@@ -1,0 +1,111 @@
+.theme-picker{
+
+    position:relative;
+
+}
+
+.theme-button{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    background:var(--card-background);
+
+    border:1px solid var(--border-color);
+
+    color:var(--text-primary);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    transition:.25s;
+
+}
+
+.theme-button:hover{
+
+    background:var(--table-row-hover);
+
+}
+
+.theme-popup{
+
+    position:absolute;
+
+    right:0;
+
+    top:55px;
+
+    width:240px;
+
+    background:var(--card-background);
+
+    border:1px solid var(--border-color);
+
+    border-radius:18px;
+
+    padding:18px;
+
+    box-shadow:var(--shadow);
+
+    z-index:999;
+
+}
+
+.theme-popup h4{
+
+    margin:0 0 15px;
+
+    color:var(--text-primary);
+
+    font-size:15px;
+
+}
+
+.theme-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:14px;
+
+}
+
+.theme-circle{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    border:3px solid transparent;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.theme-circle:hover{
+
+    transform:scale(1.08);
+
+}
+
+.theme-circle.active{
+
+    border-color:var(--text-primary);
+
+}

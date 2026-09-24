@@ -1,0 +1,329 @@
+/* ==========================================================
+   WHITE THEME (DEFAULT)
+========================================================== */
+
+:root,
+[data-theme="white"]{
+
+    --background:#F8FAFC;
+    --surface:#FFFFFF;
+    --sidebar:#FFFFFF;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#2563EB;
+    --primary-hover:#1D4ED8;
+
+    --secondary:#64748B;
+
+    --success:#16A34A;
+    --warning:#EA580C;
+    --danger:#DC2626;
+
+    --text-primary:#0F172A;
+    --text-secondary:#64748B;
+
+    --border-color:#E2E8F0;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#F8FAFC;
+    --table-row:#FFFFFF;
+    --table-row-hover:#F1F5F9;
+
+    --shadow:0 10px 25px rgba(0,0,0,.05);
+
+}
+
+/* ==========================================================
+   BLUE THEME
+========================================================== */
+
+[data-theme="blue"]{
+
+    --background:#EFF6FF;
+    --surface:#FFFFFF;
+    --sidebar:#DBEAFE;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#2563EB;
+    --primary-hover:#1D4ED8;
+
+    --secondary:#475569;
+
+    --success:#22C55E;
+    --warning:#F97316;
+    --danger:#EF4444;
+
+    --text-primary:#172554;
+    --text-secondary:#475569;
+
+    --border-color:#BFDBFE;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#DBEAFE;
+    --table-row:#FFFFFF;
+    --table-row-hover:#EFF6FF;
+
+    --shadow:0 10px 25px rgba(37,99,235,.12);
+
+}
+
+/* ==========================================================
+   GREEN THEME
+========================================================== */
+
+[data-theme="green"]{
+
+    --background:#F0FDF4;
+    --surface:#FFFFFF;
+    --sidebar:#DCFCE7;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#16A34A;
+    --primary-hover:#15803D;
+
+    --secondary:#4B5563;
+
+    --success:#16A34A;
+    --warning:#EA580C;
+    --danger:#DC2626;
+
+    --text-primary:#14532D;
+    --text-secondary:#4B5563;
+
+    --border-color:#BBF7D0;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#DCFCE7;
+    --table-row:#FFFFFF;
+    --table-row-hover:#F0FDF4;
+
+    --shadow:0 10px 25px rgba(22,163,74,.12);
+
+}
+
+/* ==========================================================
+   ORANGE THEME
+========================================================== */
+
+[data-theme="orange"]{
+
+    --background:#FFF7ED;
+    --surface:#FFFFFF;
+    --sidebar:#FFEDD5;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#EA580C;
+    --primary-hover:#C2410C;
+
+    --secondary:#57534E;
+
+    --success:#16A34A;
+    --warning:#F59E0B;
+    --danger:#DC2626;
+
+    --text-primary:#7C2D12;
+    --text-secondary:#57534E;
+
+    --border-color:#FED7AA;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#FFEDD5;
+    --table-row:#FFFFFF;
+    --table-row-hover:#FFF7ED;
+
+    --shadow:0 10px 25px rgba(234,88,12,.12);
+
+}
+
+/* ==========================================================
+   RED THEME
+========================================================== */
+
+[data-theme="red"]{
+
+    --background:#FEF2F2;
+    --surface:#FFFFFF;
+    --sidebar:#FECACA;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#DC2626;
+    --primary-hover:#B91C1C;
+
+    --secondary:#52525B;
+
+    --success:#16A34A;
+    --warning:#F59E0B;
+    --danger:#DC2626;
+
+    --text-primary:#7F1D1D;
+    --text-secondary:#52525B;
+
+    --border-color:#FECACA;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#FECACA;
+    --table-row:#FFFFFF;
+    --table-row-hover:#FEF2F2;
+
+    --shadow:0 10px 25px rgba(220,38,38,.12);
+
+}
+
+/* ==========================================================
+   PURPLE THEME
+========================================================== */
+
+[data-theme="purple"]{
+
+    --background:#FAF5FF;
+    --surface:#FFFFFF;
+    --sidebar:#E9D5FF;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#9333EA;
+    --primary-hover:#7E22CE;
+
+    --secondary:#6B7280;
+
+    --success:#16A34A;
+    --warning:#F59E0B;
+    --danger:#DC2626;
+
+    --text-primary:#581C87;
+    --text-secondary:#6B7280;
+
+    --border-color:#DDD6FE;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#E9D5FF;
+    --table-row:#FFFFFF;
+    --table-row-hover:#FAF5FF;
+
+    --shadow:0 10px 25px rgba(147,51,234,.12);
+
+}
+
+/* ==========================================================
+   SLATE THEME
+========================================================== */
+
+[data-theme="slate"]{
+
+    --background:#F8FAFC;
+    --surface:#FFFFFF;
+    --sidebar:#E2E8F0;
+    --header:#FFFFFF;
+
+    --card-background:#FFFFFF;
+
+    --primary:#475569;
+    --primary-hover:#334155;
+
+    --secondary:#64748B;
+
+    --success:#16A34A;
+    --warning:#F59E0B;
+    --danger:#DC2626;
+
+    --text-primary:#1E293B;
+    --text-secondary:#64748B;
+
+    --border-color:#CBD5E1;
+
+    --input-bg:#FFFFFF;
+
+    --table-bg:#FFFFFF;
+    --table-header:#E2E8F0;
+    --table-row:#FFFFFF;
+    --table-row-hover:#F1F5F9;
+
+    --shadow:0 10px 25px rgba(71,85,105,.12);
+
+}
+
+/* ==========================================================
+   DARK THEME
+========================================================== */
+
+[data-theme="dark"]{
+
+    --background:#0F172A;
+
+    --surface:#1E293B;
+
+    --sidebar:#111827;
+
+    --header:#1E293B;
+
+    --card-background:#1E293B;
+
+    --primary:#3B82F6;
+
+    --primary-hover:#2563EB;
+
+    --secondary:#94A3B8;
+
+    --success:#22C55E;
+
+    --warning:#F59E0B;
+
+    --danger:#EF4444;
+
+    --text-primary:#F8FAFC;
+
+    --text-secondary:#CBD5E1;
+
+    --border-color:#334155;
+
+    --input-bg:#273449;
+
+    --table-bg:#1E293B;
+
+    --table-header:#273449;
+
+    --table-row:#1E293B;
+
+    --table-row-hover:#334155;
+
+    --shadow:0 10px 25px rgba(0,0,0,.45);
+
+}
+
+*{
+
+    transition:
+
+    background-color .25s,
+
+    color .25s,
+
+    border-color .25s,
+
+    box-shadow .25s;
+
+}
+

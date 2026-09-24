@@ -1,0 +1,29 @@
+.form-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+    width:100%;
+
+}
+
+.form-label{
+
+    color:var(--text-primary);
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+.required{
+
+    color:#EF4444;
+
+    margin-left:4px;
+
+}

@@ -1,0 +1,43 @@
+.dashboard-welcome{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:28px;
+
+}
+
+.dashboard-welcome h1{
+
+    margin:0;
+
+    color:var(--text-primary);
+
+    font-size:34px;
+
+}
+
+.dashboard-welcome p{
+
+    margin-top:10px;
+
+    color:var(--text-secondary);
+
+}
+
+.today{
+
+    background:var(--card-background);
+
+    padding:14px 22px;
+
+    border-radius:14px;
+
+    border:1px solid var(--border-color);
+
+    color:var(--text-primary);
+
+}

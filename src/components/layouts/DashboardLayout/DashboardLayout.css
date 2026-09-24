@@ -1,0 +1,75 @@
+.dashboard-layout{
+
+    display:flex;
+
+    min-height:100vh;
+
+    background:var(--background);
+
+}
+
+/* Sidebar width */
+
+.dashboard-layout .sidebar{
+
+    width:280px;
+
+    height:100vh;
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+}
+
+/* Right Side */
+
+.dashboard-main{
+
+    margin-left:280px;
+
+    width:calc(100% - 280px);
+
+    min-height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:var(--background);
+
+}
+
+/* Header */
+
+.dashboard-main .header{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    width:100%;
+
+    height:80px;
+
+    background:var(--header);
+
+    border-bottom:1px solid var(--border-color);
+
+}
+
+/* Dashboard Body */
+
+.dashboard-content{
+
+    flex:1;
+
+    padding:32px;
+
+    background:var(--background);
+
+}

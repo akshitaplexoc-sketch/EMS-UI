@@ -1,0 +1,23 @@
+.sidebar-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 16px;
+
+    border-radius:14px;
+
+    transition:.25s;
+
+}
+
+.sidebar-item svg{
+
+    width:20px;
+
+    height:20px;
+
+}
