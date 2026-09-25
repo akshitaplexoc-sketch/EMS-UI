@@ -3,32 +3,54 @@ import "./StatCard.css";
 function StatCard({
     title,
     value,
-    icon: Icon,
-    color = "blue"
+    icon,
+    color,
+    percent,
+    positive = true,
+    variant = "blue"
 }) {
-
     return (
+        <div className={`stat-card ${variant}`}>
 
-        <div className="stat-card">
+            <div className="stat-top">
 
-            <div className="stat-card-left">
+                <div>
+                    <span className="stat-title">
+                        {title}
+                    </span>
 
-                <p>{title}</p>
+                    <h2>{value}</h2>
+                </div>
 
-                <h2>{value}</h2>
+                <div
+                    className="stat-icon"
+                    style={{ background: color }}
+                >
+                    {icon}
+                </div>
 
             </div>
 
-            <div className={`stat-icon ${color}`}>
+            <div className="stat-bottom">
 
-                <Icon size={26} />
+                <span
+                    className={
+                        positive
+                            ? "positive"
+                            : "negative"
+                    }
+                >
+                    {positive ? "↑" : "↓"} {percent}
+                </span>
+
+                <small>
+                    vs last month
+                </small>
 
             </div>
 
         </div>
-
     );
-
 }
 
 export default StatCard;

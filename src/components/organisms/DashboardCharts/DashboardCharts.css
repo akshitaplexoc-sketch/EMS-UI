@@ -1,0 +1,123 @@
+.dashboard-charts {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+
+    gap: 20px;
+}
+
+
+/* LEFT CHART */
+
+.chart-card {
+    width: 100%;
+    box-sizing: border-box;
+
+    background: var(--card-background);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 18px;
+
+    padding: 22px;
+
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+
+/* RIGHT SIDE */
+
+.chart-right {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+/* CHART HEADER */
+
+.chart-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 15px;
+}
+
+.chart-header h3 {
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+}
+
+.chart-header span {
+    font-size: 11px;
+
+    color: var(--text-secondary);
+}
+
+
+/* QUOTE */
+
+.quote-card {
+    min-height: 170px;
+
+    box-sizing: border-box;
+
+    padding: 26px;
+
+    border-radius: 18px;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #4f46e5
+    );
+
+    color: white;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+}
+
+.quote-card h2 {
+    margin: 0 0 12px;
+
+    font-size: 23px;
+
+    line-height: 1.25;
+}
+
+.quote-card p {
+    margin: 0;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    opacity: 0.9;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+
+    .dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+}

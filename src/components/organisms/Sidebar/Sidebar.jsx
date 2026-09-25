@@ -1,169 +1,106 @@
+import { useState } from "react";
 import {
-
+    Menu,
     LayoutDashboard,
-
     Users,
-
-    CalendarDays,
-
-    ClipboardCheck,
-
+    CalendarCheck,
+    ClipboardList,
+    Building2,
+    WalletCards,
+    BarChart3,
     Settings,
-
-    LogOut
-
+    X
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
-
-import { useAuth } from "../../../context/AuthContext";
-
 import SidebarItem from "../../molecules/SidebarItem";
-
 import "./Sidebar.css";
 
-function Sidebar(){
+function Sidebar() {
+    const [isOpen, setIsOpen] = useState(false);
 
-    const navigate = useNavigate();
+    const menuItems = [
+        {
+            label: "Dashboard",
+            path: "/dashboard",
+            icon: <LayoutDashboard size={19} />
+        },
+        {
+            label: "Employees",
+            path: "/employees",
+            icon: <Users size={19} />
+        },
+        {
+            label: "Attendance",
+            path: "/attendance",
+            icon: <CalendarCheck size={19} />
+        },
+        {
+            label: "Leave",
+            path: "/leave",
+            icon: <ClipboardList size={19} />
+        },
+        {
+            label: "Departments",
+            path: "/departments",
+            icon: <Building2 size={19} />
+        },
+        {
+            label: "Payroll",
+            path: "/payroll",
+            icon: <WalletCards size={19} />
+        },
+        {
+            label: "Reports",
+            path: "/reports",
+            icon: <BarChart3 size={19} />
+        },
+        {
+            label: "Settings",
+            path: "/settings",
+            icon: <Settings size={19} />
+        }
+    ];
 
-    const {
+    return (
+        <aside className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
 
-        user,
-
-        logout
-
-    } = useAuth();
-
-    const handleLogout=()=>{
-
-        logout();
-
-        navigate("/");
-
-    }
-
-    return(
-
-        <aside className="sidebar">
-
-            <div>
-
-                <div className="sidebar-logo">
-
-                    <h2>EMS</h2>
-
-                    <p>Employee Management</p>
-
-                </div>
-
-                <nav className="sidebar-menu">
-
-                    <SidebarItem
-
-                        icon={LayoutDashboard}
-
-                        title="Dashboard"
-
-                        to="/dashboard"
-
-                    />
-
-                    <SidebarItem
-
-                        icon={Users}
-
-                        title="Employees"
-
-                        to="/employees"
-
-                    />
-
-                    <SidebarItem
-
-                        icon={CalendarDays}
-
-                        title="Attendance"
-
-                        to="/attendance"
-
-                    />
-
-                    <SidebarItem
-
-                        icon={ClipboardCheck}
-
-                        title="Leave Requests"
-
-                        to="/leave"
-
-                    />
-
-                    <SidebarItem
-
-                        icon={Settings}
-
-                        title="Settings"
-
-                        to="/settings"
-
-                    />
-
-                </nav>
-
-            </div>
-
-            <div className="sidebar-footer">
-
-                <div className="sidebar-user">
-
-                    <div className="avatar">
-
-                        {
-
-                            user?.username?.charAt(0).toUpperCase()
-
-                        }
-
-                    </div>
-
-                    <div>
-
-                        <h4>
-
-                            {user?.username}
-
-                        </h4>
-
-                        <p>
-
-                            {user?.role}
-
-                        </p>
-
-                    </div>
-
-                </div>
+            <div className="sidebar-top">
 
                 <button
-
-                    className="logout-btn"
-
-                    onClick={handleLogout}
-
+                    className="sidebar-menu-btn"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-label="Toggle menu"
                 >
-
-                    <LogOut size={18}/>
-
-                    Logout
-
+                    {isOpen ? (
+                        <X size={22} />
+                    ) : (
+                        <Menu size={22} />
+                    )}
                 </button>
+
+                {isOpen && (
+                    <div className="sidebar-title">
+                        <span>EMS</span>
+                        <small>Employee Management</small>
+                    </div>
+                )}
 
             </div>
 
+            <nav className="sidebar-nav">
+                {menuItems.map((item) => (
+                    <SidebarItem
+                        key={item.path}
+                        icon={item.icon}
+                        label={item.label}
+                        path={item.path}
+                        collapsed={!isOpen}
+                    />
+                ))}
+            </nav>
+
         </aside>
-
-    )
-
+    );
 }
 
 export default Sidebar;
