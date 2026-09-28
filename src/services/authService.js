@@ -1,24 +1,41 @@
 import api from "./api";
 
-export const login = async (loginData) => {
+export const login = async ({ email, password }) => {
+    const response = await api.post("/Auth/login", {
+        email,
+        password
+    });
 
-    const response = await api.post(
-        "/auth/login",
-        loginData
+    const result = response.data;
+
+    const token = result?.data?.token;
+
+    if (!token) {
+        throw new Error("Login succeeded but no authentication token was returned.");
+    }
+
+    localStorage.setItem("token", token);
+
+    // Store user information for the dashboard/header
+    localStorage.setItem(
+        "user",
+        JSON.stringify(result.data)
     );
 
-    return response.data;
-
+    return result.data;
 };
 
-
-export const register = async (registerData) => {
-
-    const response = await api.post(
-        "/auth/register",
-        registerData
-    );
+export const register = async ({ name, email, password }) => {
+    const response = await api.post("/Auth/register", {
+        username: name,
+        email,
+        password
+    });
 
     return response.data;
+};
 
+export const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 };

@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 
-import {
-    Plus,
-    Search,
-    Pencil,
-    Trash2
-} from "lucide-react";
-
+import DashboardLayout from "../../components/layouts/DashboardLayout";
+import Card from "../../components/atoms/Card";
+import Button from "../../components/atoms/Button";
+import SearchBar from "../../components/molecules/SearchBar";
+import EmployeeRow from "../../components/molecules/EmployeeRow";
 import AddEmployeeModal from "../../components/organisms/AddEmployeeModal";
 
 import {
@@ -16,35 +15,31 @@ import {
     deleteEmployee
 } from "../../services/employeeService";
 
-import "./Employees.css";
-
 function Employees() {
     const [employees, setEmployees] = useState([]);
     const [search, setSearch] = useState("");
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     const loadEmployees = async () => {
         try {
             setLoading(true);
-            setError("");
 
-            const response = await getEmployees();
+            const data = await getEmployees();
 
-            console.log("Employees API response:", response);
-
-            setEmployees(response?.data || []);
-        } catch (err) {
-            console.error("Failed to load employees:", err);
-
-            setError(
-                err?.response?.data?.message ||
-                "Failed to load employees."
+            setEmployees(
+                Array.isArray(data) ? data : []
             );
+        } catch (error) {
+            console.error(
+                "Failed to load employees:",
+                error
+            );
+
+            setEmployees([]);
         } finally {
             setLoading(false);
         }
@@ -54,78 +49,83 @@ function Employees() {
         loadEmployees();
     }, []);
 
-    const handleAddEmployee = async (employeeData) => {
-        try {
-            setError("");
+    const filteredEmployees = useMemo(() => {
+        const searchValue = search
+            .trim()
+            .toLowerCase();
 
-            await createEmployee(employeeData);
-
-            setIsModalOpen(false);
-            setSelectedEmployee(null);
-
-            await loadEmployees();
-        } catch (err) {
-            console.error("Failed to create employee:", err);
-
-            setError(
-                err?.response?.data?.message ||
-                "Failed to add employee."
-            );
+        if (!searchValue) {
+            return employees;
         }
+
+        return employees.filter((employee) => {
+            return (
+                employee?.name
+                    ?.toLowerCase()
+                    .includes(searchValue) ||
+                employee?.email
+                    ?.toLowerCase()
+                    .includes(searchValue) ||
+                employee?.department
+                    ?.toLowerCase()
+                    .includes(searchValue)
+            );
+        });
+    }, [employees, search]);
+
+    // Open modal for adding employee
+    const handleAddEmployee = () => {
+        setSelectedEmployee(null);
+        setModalOpen(true);
     };
 
+    // Open modal for editing employee
     const handleEditEmployee = (employee) => {
-        console.log("Selected employee:", employee);
-        console.log("Selected employee ID:", employee.id);
-
         setSelectedEmployee(employee);
-        setIsModalOpen(true);
+        setModalOpen(true);
     };
 
-    const handleUpdateEmployee = async (employeeData) => {
+    // Close modal
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        setSelectedEmployee(null);
+    };
+
+    // Add or update employee
+    const handleSubmitEmployee = async (employeeData) => {
         try {
-            setError("");
-
-            console.log(
-                "Updating employee:",
-                selectedEmployee
-            );
-
-            console.log(
-                "Employee ID:",
-                selectedEmployee?.id
-            );
-
-            if (!selectedEmployee?.id) {
-                setError("Employee ID is missing.");
-                return;
+            if (selectedEmployee) {
+                await updateEmployee(
+                    selectedEmployee.id,
+                    employeeData
+                );
+            } else {
+                await createEmployee(employeeData);
             }
 
-            await updateEmployee(
-                selectedEmployee.id,
-                employeeData
-            );
-
-            setIsModalOpen(false);
+            setModalOpen(false);
             setSelectedEmployee(null);
 
             await loadEmployees();
-        } catch (err) {
+        } catch (error) {
             console.error(
-                "Failed to update employee:",
-                err
+                "Failed to save employee:",
+                error
             );
 
-            setError(
-                err?.response?.data?.message ||
-                "Failed to update employee."
+            alert(
+                error?.response?.data?.message ||
+                "Failed to save employee. Please try again."
             );
+
+            throw error;
         }
     };
 
-    const handleDeleteEmployee = async (employee) => {
+    // Delete employee
+    const handleDeleteEmployee = async (id) => {
         const confirmed = window.confirm(
-            `Are you sure you want to delete ${employee.name}?`
+            "Are you sure you want to delete this employee?"
         );
 
         if (!confirmed) {
@@ -133,232 +133,275 @@ function Employees() {
         }
 
         try {
-            setError("");
-
-            await deleteEmployee(employee.id);
+            await deleteEmployee(id);
 
             await loadEmployees();
-        } catch (err) {
+        } catch (error) {
             console.error(
                 "Failed to delete employee:",
-                err
+                error
             );
 
-            setError(
-                err?.response?.data?.message ||
-                "Failed to delete employee."
+            alert(
+                error?.response?.data?.message ||
+                "Failed to delete employee. Please try again."
             );
         }
     };
-
-    const handleModalSubmit = (employeeData) => {
-        if (selectedEmployee) {
-            handleUpdateEmployee(employeeData);
-        } else {
-            handleAddEmployee(employeeData);
-        }
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedEmployee(null);
-    };
-
-    const filteredEmployees = employees.filter(
-        (employee) => {
-            const searchValue =
-                search.toLowerCase();
-
-            return (
-                employee.id
-                    ?.toString()
-                    .includes(searchValue) ||
-                employee.name
-                    ?.toLowerCase()
-                    .includes(searchValue) ||
-                employee.email
-                    ?.toLowerCase()
-                    .includes(searchValue) ||
-                employee.department
-                    ?.toLowerCase()
-                    .includes(searchValue)
-            );
-        }
-    );
 
     return (
-        <div className="employees-page">
-
-            <div className="employees-header">
-                <div>
-                    <h1>Employees</h1>
-
-                    <p>
-                        Manage your organization's employees.
-                    </p>
-                </div>
-
-                <button
-                    className="add-employee-btn"
-                    onClick={() => {
-                        setSelectedEmployee(null);
-                        setIsModalOpen(true);
+        <DashboardLayout
+            title="Employees"
+            subtitle="Manage your employees"
+        >
+            <Card
+                style={{
+                    width: "100%",
+                    boxSizing: "border-box"
+                }}
+            >
+                {/* Page Header */}
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "20px",
+                        marginBottom: "24px"
                     }}
                 >
-                    <Plus size={18} />
+                    <div>
+                        <h2
+                            style={{
+                                margin: 0,
+                                color: "var(--theme-text)",
+                                fontSize: "24px",
+                                fontWeight: 700
+                            }}
+                        >
+                            Employee Directory
+                        </h2>
 
-                    Add Employee
-                </button>
-            </div>
-
-            {error && (
-                <div className="employees-error">
-                    {error}
-                </div>
-            )}
-
-            <div className="employees-card">
-
-                <div className="employees-toolbar">
-
-                    <div className="employee-search">
-
-                        <Search size={17} />
-
-                        <input
-                            type="text"
-                            placeholder="Search employees..."
-                            value={search}
-                            onChange={(e) =>
-                                setSearch(e.target.value)
-                            }
-                        />
-
+                        <p
+                            style={{
+                                margin: "6px 0 0",
+                                color: "var(--theme-muted)",
+                                fontSize: "14px"
+                            }}
+                        >
+                            {employees.length} employees
+                        </p>
                     </div>
 
+                    <Button
+                        type="button"
+                        variant="primary"
+                        icon={<Plus size={18} />}
+                        onClick={handleAddEmployee}
+                    >
+                        Add Employee
+                    </Button>
                 </div>
 
-                <div className="employees-table-wrapper">
+                {/* Search */}
+                <div
+                    style={{
+                        marginBottom: "24px",
+                        maxWidth: "400px"
+                    }}
+                >
+                    <SearchBar
+                        value={search}
+                        onChange={(event) =>
+                            setSearch(event.target.value)
+                        }
+                        placeholder="Search employees..."
+                    />
+                </div>
 
-                    <table className="employees-table">
+                {/* Loading */}
+                {loading ? (
+                    <div
+                        style={{
+                            padding: "40px",
+                            textAlign: "center",
+                            color: "var(--theme-muted)"
+                        }}
+                    >
+                        Loading employees...
+                    </div>
+                ) : (
+                    <div
+                        style={{
+                            width: "100%",
+                            overflowX: "auto"
+                        }}
+                    >
+                        <table
+                            style={{
+                                width: "100%",
+                                minWidth: "900px",
+                                borderCollapse: "collapse",
+                                tableLayout: "fixed"
+                            }}
+                        >
+                            <colgroup>
+                                <col
+                                    style={{
+                                        width: "28%"
+                                    }}
+                                />
 
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Department</th>
-                                <th>Salary</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+                                <col
+                                    style={{
+                                        width: "22%"
+                                    }}
+                                />
 
-                        <tbody>
+                                <col
+                                    style={{
+                                        width: "25%"
+                                    }}
+                                />
 
-                            {loading ? (
+                                <col
+                                    style={{
+                                        width: "15%"
+                                    }}
+                                />
+
+                                <col
+                                    style={{
+                                        width: "10%"
+                                    }}
+                                />
+                            </colgroup>
+
+                            <thead>
                                 <tr>
-                                    <td
-                                        colSpan="6"
-                                        className="employees-message"
+                                    <th
+                                        style={{
+                                            textAlign: "left",
+                                            padding: "0 0 14px",
+                                            color: "var(--theme-muted)",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            textTransform: "uppercase",
+                                            borderBottom:
+                                                "1px solid var(--theme-border)"
+                                        }}
                                     >
-                                        Loading employees...
-                                    </td>
-                                </tr>
-                            ) : filteredEmployees.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan="6"
-                                        className="employees-message"
+                                        Employee
+                                    </th>
+
+                                    <th
+                                        style={{
+                                            textAlign: "left",
+                                            padding: "0 0 14px",
+                                            color: "var(--theme-muted)",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            textTransform: "uppercase",
+                                            borderBottom:
+                                                "1px solid var(--theme-border)"
+                                        }}
                                     >
-                                        No employees found.
-                                    </td>
+                                        Department
+                                    </th>
+
+                                    <th
+                                        style={{
+                                            textAlign: "left",
+                                            padding: "0 0 14px",
+                                            color: "var(--theme-muted)",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            textTransform: "uppercase",
+                                            borderBottom:
+                                                "1px solid var(--theme-border)"
+                                        }}
+                                    >
+                                        Email
+                                    </th>
+
+                                    <th
+                                        style={{
+                                            textAlign: "left",
+                                            padding: "0 0 14px",
+                                            color: "var(--theme-muted)",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            textTransform: "uppercase",
+                                            borderBottom:
+                                                "1px solid var(--theme-border)"
+                                        }}
+                                    >
+                                        Salary
+                                    </th>
+
+                                    <th
+                                        style={{
+                                            textAlign: "center",
+                                            padding: "0 0 14px",
+                                            color: "var(--theme-muted)",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            textTransform: "uppercase",
+                                            borderBottom:
+                                                "1px solid var(--theme-border)"
+                                        }}
+                                    >
+                                        Actions
+                                    </th>
                                 </tr>
-                            ) : (
-                                filteredEmployees.map(
-                                    (employee) => (
-                                        <tr
-                                            key={employee.id}
+                            </thead>
+
+                            <tbody>
+                                {filteredEmployees.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan="5"
+                                            style={{
+                                                padding:
+                                                    "40px 20px",
+                                                textAlign: "center",
+                                                color:
+                                                    "var(--theme-muted)"
+                                            }}
                                         >
-                                            <td>
-                                                {employee.id}
-                                            </td>
-
-                                            <td>
-                                                {employee.name}
-                                            </td>
-
-                                            <td>
-                                                {employee.email}
-                                            </td>
-
-                                            <td>
-                                                {employee.department}
-                                            </td>
-
-                                            <td>
-                                                ₹
-                                                {Number(
-                                                    employee.salary
-                                                ).toLocaleString(
-                                                    "en-IN"
-                                                )}
-                                            </td>
-
-                                            <td>
-                                                <div className="employee-actions">
-
-                                                    <button
-                                                        type="button"
-                                                        className="employee-action edit"
-                                                        onClick={() =>
-                                                            handleEditEmployee(
-                                                                employee
-                                                            )
-                                                        }
-                                                        title="Edit employee"
-                                                    >
-                                                        <Pencil
-                                                            size={16}
-                                                        />
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        className="employee-action delete"
-                                                        onClick={() =>
-                                                            handleDeleteEmployee(
-                                                                employee
-                                                            )
-                                                        }
-                                                        title="Delete employee"
-                                                    >
-                                                        <Trash2
-                                                            size={16}
-                                                        />
-                                                    </button>
-
-                                                </div>
-                                            </td>
-                                        </tr>
+                                            No employees found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredEmployees.map(
+                                        (employee) => (
+                                            <EmployeeRow
+                                                key={employee.id}
+                                                employee={employee}
+                                                onEdit={
+                                                    handleEditEmployee
+                                                }
+                                                onDelete={
+                                                    handleDeleteEmployee
+                                                }
+                                            />
+                                        )
                                     )
-                                )
-                            )}
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </Card>
 
-                        </tbody>
-
-                    </table>
-
-                </div>
-            </div>
-
+            {/* Add / Edit Employee Modal */}
             <AddEmployeeModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                onSubmit={handleModalSubmit}
+                isOpen={modalOpen}
                 employee={selectedEmployee}
+                onClose={handleCloseModal}
+                onSubmit={handleSubmitEmployee}
             />
-
-        </div>
+        </DashboardLayout>
     );
 }
 

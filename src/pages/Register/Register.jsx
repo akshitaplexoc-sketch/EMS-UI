@@ -1,130 +1,53 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Card from "../../components/atoms/Card";
 import AuthForm from "../../components/organisms/AuthForm";
 import AuthLayout from "../../components/layouts/AuthLayout";
-
-import { register } from "../../services/authService";
-
-import "../Login/Login.css";
+import { register as registerService } from "../../services/authService";
 
 function Register() {
-
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState("");
 
     const handleRegister = async (formData) => {
-
-        setError("");
-
-        if (formData.password !== formData.confirmPassword) {
-
-            setError("Password and confirm password do not match.");
-
-            return;
-
-        }
-
-        setLoading(true);
-
         try {
+            setLoading(true);
+            setError("");
 
-            const registerData = {
-                username: formData.username,
-                email: formData.email,
-                password: formData.password
-            };
+            await registerService(formData);
 
-            const response = await register(registerData);
-
-            if (response.status === 200) {
-
-                navigate("/");
-
-            }
-            else {
-
-                setError(
-                    response.message ||
-                    "Registration failed."
-                );
-
-            }
-
-        }
-        catch (error) {
-
-            console.error("Register Error:", error);
+            navigate("/login");
+        } catch (error) {
+            console.error("Registration failed:", error);
 
             setError(
-                error.response?.data?.message ||
-                "Unable to create account."
+                error?.response?.data?.message ||
+                "Registration failed. Please try again."
             );
-
-        }
-        finally {
-
+        } finally {
             setLoading(false);
-
         }
-
-    };
-
-    const goToLogin = () => {
-
-        navigate("/");
-
     };
 
     return (
-
         <AuthLayout>
-
-            <Card className="login-card">
-
-                <div className="auth-heading">
-
-                    <h2>
-                        Create Account
-                    </h2>
-
-                    <p>
-                        Create your Employee Management System account.
-                    </p>
-
-                </div>
-
+            <Card
+                style={{
+                    maxWidth: "480px",
+                    margin: "0 auto"
+                }}
+            >
                 <AuthForm
-                    mode="register"
+                    type="register"
                     onSubmit={handleRegister}
                     loading={loading}
                     error={error}
                 />
-
-                <p className="auth-switch-text">
-
-                    Already have an account?
-
-                    <button
-                        type="button"
-                        className="auth-switch-link"
-                        onClick={goToLogin}
-                    >
-                        Login
-                    </button>
-
-                </p>
-
             </Card>
-
         </AuthLayout>
-
     );
-
 }
 
 export default Register;
