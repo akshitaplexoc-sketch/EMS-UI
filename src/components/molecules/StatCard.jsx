@@ -6,12 +6,31 @@ function StatCard({
     subtitle,
     icon,
     iconBackground,
-    iconColor
+    iconColor,
+    onClick
 }) {
     return (
         <Card
+            onClick={onClick}
             style={{
-                padding: "22px"
+                padding: "22px",
+                cursor: onClick ? "pointer" : "default",
+                transition: "all .25s ease",
+                borderRadius: "18px",
+                userSelect: "none"
+            }}
+            onMouseEnter={(e) => {
+                if (onClick) {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.boxShadow =
+                        "0 12px 28px rgba(0,0,0,.08)";
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (onClick) {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "";
+                }
             }}
         >
             <div

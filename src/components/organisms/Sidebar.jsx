@@ -4,10 +4,12 @@ import {
     Users,
     CalendarCheck,
     CalendarDays,
+    Settings,
     UserCircle
 } from "lucide-react";
 
 function Sidebar() {
+
     const menuItems = [
         {
             label: "Dashboard",
@@ -28,6 +30,11 @@ function Sidebar() {
             label: "Leave",
             path: "/leave",
             icon: <CalendarDays size={19} />
+        },
+        {
+            label: "Settings",
+            path: "/settings",
+            icon: <Settings size={19} />
         }
     ];
 
@@ -52,6 +59,7 @@ function Sidebar() {
             }}
         >
             {/* Logo */}
+
             <div
                 style={{
                     height: "76px",
@@ -111,6 +119,7 @@ function Sidebar() {
             </div>
 
             {/* Navigation */}
+
             <nav
                 style={{
                     flex: 1,
@@ -156,8 +165,7 @@ function Sidebar() {
                                 backgroundColor: isActive
                                     ? "color-mix(in srgb, var(--theme-primary) 10%, white)"
                                     : "transparent",
-                                transition:
-                                    "all 0.2s ease"
+                                transition: "all .2s ease"
                             })}
                         >
                             {item.icon}
@@ -168,7 +176,8 @@ function Sidebar() {
                 </div>
             </nav>
 
-            {/* Administrator */}
+            {/* User */}
+
             <div
                 style={{
                     padding: "14px",

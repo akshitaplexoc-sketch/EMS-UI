@@ -1,1157 +1,595 @@
 import { useEffect, useState } from "react";
-import { Plus, Check, X } from "lucide-react";
-
-import DashboardLayout from "../../components/layouts/DashboardLayout";
-import Card from "../../components/atoms/Card";
-import Button from "../../components/atoms/Button";
 
 import {
-    getLeaves,
-    createLeave,
-    updateLeaveStatus
+    Plus,
+    Search,
+    Pencil,
+    Trash2
+} from "lucide-react";
+
+import DashboardLayout from "../../components/layouts/DashboardLayout";
+
+import Card from "../../components/atoms/Card";
+import Button from "../../components/atoms/Button";
+import Input from "../../components/atoms/Input";
+import Avatar from "../../components/atoms/Avatar";
+import Badge from "../../components/atoms/Badge";
+import IconButton from "../../components/atoms/IconButton";
+
+import ApplyLeaveModal from "../../components/organisms/ApplyLeaveModal";
+
+import {
+    getLeaveRequests,
+    createLeaveRequest,
+    updateLeaveStatus,
+    deleteLeaveRequest
 } from "../../services/leaveService";
 
-import { getEmployees } from "../../services/employeeService";
-
-
 function Leave() {
-    const [leaves, setLeaves] = useState([]);
-    const [employees, setEmployees] = useState([]);
 
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [leaveRequests,setLeaveRequests]=useState([]);
+    const [loading,setLoading]=useState(true);
+    const [error,setError]=useState("");
 
-    const [modalOpen, setModalOpen] = useState(false);
+    const [search,setSearch]=useState("");
+    const [statusFilter,setStatusFilter]=useState("All");
 
-    const [formData, setFormData] = useState({
-        employeeId: "",
-        fromDate: "",
-        toDate: "",
-        reason: ""
-    });
+    const [isModalOpen,setIsModalOpen]=useState(false);
+    const [selectedLeave,setSelectedLeave]=useState(null);
 
+    useEffect(()=>{
+        loadLeaveRequests();
+    },[]);
 
-    // =========================================================
-    // LOAD DATA
-    // =========================================================
+    const loadLeaveRequests=async()=>{
 
-    const loadData = async () => {
-        try {
+        try{
+
             setLoading(true);
 
-            console.log("Loading leave data...");
+            const response=await getLeaveRequests();
 
-            const [leaveResult, employeeResult] =
-                await Promise.all([
-                    getLeaves(),
-                    getEmployees()
-                ]);
+            setLeaveRequests(response.data || []);
 
-            console.log("Leave data:", leaveResult);
-            console.log("Employee data:", employeeResult);
+        }
 
-            setLeaves(
-                Array.isArray(leaveResult)
-                    ? leaveResult
-                    : []
+        catch(err){
+
+            setError(
+                err?.response?.data?.message ||
+                "Failed to load leave requests."
             );
 
-            setEmployees(
-                Array.isArray(employeeResult)
-                    ? employeeResult
-                    : []
-            );
+        }
 
-        } catch (error) {
-            console.error(
-                "Failed to load leave data:",
-                error
-            );
+        finally{
 
-            console.error(
-                "Leave API error response:",
-                error?.response?.data
-            );
-
-            setLeaves([]);
-            setEmployees([]);
-        } finally {
             setLoading(false);
+
         }
+
     };
+    const handleSubmit = async (formData) => {
 
+            try {
 
-    // =========================================================
-    // INITIAL LOAD
-    // =========================================================
+                setError("");
 
-    useEffect(() => {
-        loadData();
-    }, []);
+                if (selectedLeave) {
 
+                    await updateLeaveStatus(
+                        selectedLeave.id,
+                        formData.status
+                    );
 
-    // =========================================================
-    // FORM CHANGE
-    // =========================================================
+                } else {
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
+                    await createLeaveRequest({
+                        employeeId: Number(formData.employeeId),
+                        fromDate: formData.fromDate,
+                        toDate: formData.toDate,
+                        reason: formData.reason,
+                        status: formData.status
+                    });
 
-        setFormData((previous) => ({
-            ...previous,
-            [name]: value
-        }));
-    };
+                }
 
+                setIsModalOpen(false);
+                setSelectedLeave(null);
 
-    // =========================================================
-    // OPEN MODAL
-    // =========================================================
+                await loadLeaveRequests();
 
-    const handleAddLeave = () => {
-        setFormData({
-            employeeId: "",
-            fromDate: "",
-            toDate: "",
-            reason: ""
-        });
+            }
+            catch (err) {
 
-        setModalOpen(true);
-    };
+                console.error(err);
 
+                setError(
+                    err?.response?.data?.message ||
+                    "Operation failed."
+                );
 
-    // =========================================================
-    // CLOSE MODAL
-    // =========================================================
+            }
 
-    const handleCloseModal = () => {
-        if (saving) {
-            return;
-        }
-
-        setModalOpen(false);
-    };
-
-
-    // =========================================================
-    // CREATE LEAVE
-    // =========================================================
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        if (
-            !formData.employeeId ||
-            !formData.fromDate ||
-            !formData.toDate ||
-            !formData.reason.trim()
-        ) {
-            alert(
-                "Employee, From Date, To Date and Reason are required."
-            );
-
-            return;
-        }
-
-
-        if (
-            new Date(formData.fromDate) >
-            new Date(formData.toDate)
-        ) {
-            alert(
-                "From Date cannot be after To Date."
-            );
-
-            return;
-        }
-
-
-        try {
-            setSaving(true);
-
-            const payload = {
-                employeeId: Number(
-                    formData.employeeId
-                ),
-
-                fromDate: formData.fromDate,
-
-                toDate: formData.toDate,
-
-                reason: formData.reason.trim()
-            };
-
-            console.log(
-                "Creating leave:",
-                payload
-            );
-
-            await createLeave(payload);
-
-            setModalOpen(false);
-
-            setFormData({
-                employeeId: "",
-                fromDate: "",
-                toDate: "",
-                reason: ""
-            });
-
-            await loadData();
-
-        } catch (error) {
-            console.error(
-                "Failed to create leave:",
-                error
-            );
-
-            alert(
-                error?.response?.data?.message ||
-                "Failed to create leave request."
-            );
-        } finally {
-            setSaving(false);
-        }
-    };
-
-
-    // =========================================================
-    // APPROVE / REJECT
-    // =========================================================
-
-    const handleStatusChange = async (
-        id,
-        status
-    ) => {
-        const message =
-            status === "Approved"
-                ? "Are you sure you want to approve this leave request?"
-                : "Are you sure you want to reject this leave request?";
-
-
-        const confirmed =
-            window.confirm(message);
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        try {
-            await updateLeaveStatus(
-                id,
-                status
-            );
-
-            // Immediately update UI
-            setLeaves((previous) =>
-                previous.map((leave) =>
-                    leave.id === id
-                        ? {
-                              ...leave,
-                              status: status
-                          }
-                        : leave
-                )
-            );
-
-        } catch (error) {
-            console.error(
-                "Failed to update leave status:",
-                error
-            );
-
-            alert(
-                error?.response?.data?.message ||
-                `Failed to ${status.toLowerCase()} leave request.`
-            );
-        }
-    };
-
-
-    // =========================================================
-    // STATUS STYLE
-    // =========================================================
-
-    const getStatusStyle = (status) => {
-        const normalizedStatus =
-            status?.toLowerCase();
-
-
-        if (normalizedStatus === "approved") {
-            return {
-                background: "#DCFCE7",
-                color: "#166534"
-            };
-        }
-
-
-        if (normalizedStatus === "rejected") {
-            return {
-                background: "#FEE2E2",
-                color: "#991B1B"
-            };
-        }
-
-
-        return {
-            background: "#FEF3C7",
-            color: "#92400E"
         };
-    };
 
+    const formatDate=(date)=>{
 
-    // =========================================================
-    // FORMAT DATE
-    // =========================================================
+        if(!date) return "-";
 
-    const formatDate = (date) => {
-        if (!date) {
-            return "-";
-        }
-
-        const parsedDate =
-            new Date(date);
-
-        if (Number.isNaN(parsedDate.getTime())) {
-            return "-";
-        }
-
-        return parsedDate.toLocaleDateString(
-            "en-GB"
+        return new Date(date).toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric"
+            }
         );
+
     };
 
+    const filteredLeaves=leaveRequests.filter((leave)=>{
 
-    return (
-        <DashboardLayout
+        const value=search.toLowerCase();
+
+        const matchesSearch=
+
+            leave.employeeName
+            ?.toLowerCase()
+            .includes(value)
+
+            ||
+
+            leave.reason
+            ?.toLowerCase()
+            .includes(value);
+
+        const matchesStatus=
+
+            statusFilter==="All"
+
+            ||
+
+            leave.status===statusFilter;
+
+        return matchesSearch && matchesStatus;
+
+    });
+
+    return(
+
+            <DashboardLayout
             title="Leave Management"
             subtitle="Manage employee leave requests"
-        >
-
-            <Card
-                style={{
-                    width: "100%",
-                    boxSizing: "border-box"
-                }}
             >
 
-                {/* ================================================= */}
-                {/* HEADER */}
-                {/* ================================================= */}
-
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "20px",
-                        marginBottom: "28px"
-                    }}
-                >
-
-                    <div>
-                        <h2
-                            style={{
-                                margin: 0,
-                                color: "#0F172A",
-                                fontSize: "24px",
-                                fontWeight: 700
-                            }}
-                        >
-                            Leave Requests
-                        </h2>
-
-                        <p
-                            style={{
-                                margin:
-                                    "6px 0 0",
-                                color: "#64748B",
-                                fontSize: "14px"
-                            }}
-                        >
-                            Manage employee leave
-                            requests
-                        </p>
-                    </div>
-
-
-                    <Button
-                        variant="primary"
-                        icon={
-                            <Plus size={18} />
-                        }
-                        onClick={
-                            handleAddLeave
-                        }
-                    >
-                        Add Leave
-                    </Button>
-
-                </div>
-
-
-                {/* ================================================= */}
-                {/* LOADING */}
-                {/* ================================================= */}
-
-                {loading ? (
-
-                    <div
-                        style={{
-                            padding: "50px",
-                            textAlign: "center",
-                            color: "#64748B"
-                        }}
-                    >
-                        Loading leave requests...
-                    </div>
-
-                ) : (
-
-                    /* ================================================= */
-                    /* TABLE */
-                    /* ================================================= */
-
-                    <div
-                        style={{
-                            width: "100%",
-                            overflowX: "auto"
-                        }}
-                    >
-
-                        <table
-                            style={{
-                                width: "100%",
-                                minWidth:
-                                    "950px",
-                                borderCollapse:
-                                    "collapse"
-                            }}
-                        >
-
-                            <thead>
-
-                                <tr>
-
-                                    <th
-                                        style={headerStyle}
-                                    >
-                                        Employee
-                                    </th>
-
-                                    <th
-                                        style={headerStyle}
-                                    >
-                                        From Date
-                                    </th>
-
-                                    <th
-                                        style={headerStyle}
-                                    >
-                                        To Date
-                                    </th>
-
-                                    <th
-                                        style={headerStyle}
-                                    >
-                                        Reason
-                                    </th>
-
-                                    <th
-                                        style={{
-                                            ...headerStyle,
-                                            textAlign:
-                                                "center"
-                                        }}
-                                    >
-                                        Status
-                                    </th>
-
-                                    <th
-                                        style={{
-                                            ...headerStyle,
-                                            textAlign:
-                                                "center"
-                                        }}
-                                    >
-                                        Actions
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {leaves.length ===
-                                0 ? (
-
-                                    <tr>
-
-                                        <td
-                                            colSpan="6"
-                                            style={{
-                                                padding:
-                                                    "50px",
-                                                textAlign:
-                                                    "center",
-                                                color:
-                                                    "#64748B"
-                                            }}
-                                        >
-                                            No leave
-                                            requests
-                                            found.
-                                        </td>
-
-                                    </tr>
-
-                                ) : (
-
-                                    leaves.map(
-                                        (leave) => {
-
-                                            const
-                                                statusStyle =
-                                                    getStatusStyle(
-                                                        leave.status
-                                                    );
-
-
-                                            return (
-
-                                                <tr
-                                                    key={
-                                                        leave.id
-                                                    }
-                                                >
-
-                                                    <td
-                                                        style={
-                                                            cellStyle
-                                                        }
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                fontWeight:
-                                                                    600,
-                                                                color:
-                                                                    "#0F172A"
-                                                            }}
-                                                        >
-                                                            {
-                                                                leave.employeeName ||
-                                                                `Employee #${leave.employeeId}`
-                                                            }
-                                                        </div>
-                                                    </td>
-
-
-                                                    <td
-                                                        style={
-                                                            cellStyle
-                                                        }
-                                                    >
-                                                        {
-                                                            formatDate(
-                                                                leave.fromDate
-                                                            )
-                                                        }
-                                                    </td>
-
-
-                                                    <td
-                                                        style={
-                                                            cellStyle
-                                                        }
-                                                    >
-                                                        {
-                                                            formatDate(
-                                                                leave.toDate
-                                                            )
-                                                        }
-                                                    </td>
-
-
-                                                    <td
-                                                        style={{
-                                                            ...cellStyle,
-                                                            maxWidth:
-                                                                "250px"
-                                                        }}
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                overflow:
-                                                                    "hidden",
-                                                                textOverflow:
-                                                                    "ellipsis",
-                                                                whiteSpace:
-                                                                    "nowrap"
-                                                            }}
-                                                            title={
-                                                                leave.reason
-                                                            }
-                                                        >
-                                                            {
-                                                                leave.reason
-                                                            }
-                                                        </div>
-                                                    </td>
-
-
-                                                    <td
-                                                        style={{
-                                                            ...cellStyle,
-                                                            textAlign:
-                                                                "center"
-                                                        }}
-                                                    >
-
-                                                        <span
-                                                            style={{
-                                                                display:
-                                                                    "inline-flex",
-                                                                alignItems:
-                                                                    "center",
-                                                                justifyContent:
-                                                                    "center",
-                                                                padding:
-                                                                    "6px 12px",
-                                                                borderRadius:
-                                                                    "999px",
-                                                                fontSize:
-                                                                    "12px",
-                                                                fontWeight:
-                                                                    600,
-                                                                background:
-                                                                    statusStyle.background,
-                                                                color:
-                                                                    statusStyle.color
-                                                            }}
-                                                        >
-                                                            {
-                                                                leave.status ||
-                                                                "Pending"
-                                                            }
-                                                        </span>
-
-                                                    </td>
-
-
-                                                    <td
-                                                        style={{
-                                                            ...cellStyle,
-                                                            textAlign:
-                                                                "center"
-                                                        }}
-                                                    >
-
-                                                        {
-                                                            leave.status?.toLowerCase() ===
-                                                            "pending" ||
-                                                            !leave.status ? (
-
-                                                                <div
-                                                                    style={{
-                                                                        display:
-                                                                            "flex",
-                                                                        justifyContent:
-                                                                            "center",
-                                                                        gap:
-                                                                            "8px"
-                                                                    }}
-                                                                >
-
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() =>
-                                                                            handleStatusChange(
-                                                                                leave.id,
-                                                                                "Approved"
-                                                                            )
-                                                                        }
-                                                                        style={{
-                                                                            display:
-                                                                                "inline-flex",
-                                                                            alignItems:
-                                                                                "center",
-                                                                            gap:
-                                                                                "5px",
-                                                                            border:
-                                                                                "none",
-                                                                            background:
-                                                                                "#DCFCE7",
-                                                                            color:
-                                                                                "#166534",
-                                                                            padding:
-                                                                                "7px 10px",
-                                                                            borderRadius:
-                                                                                "7px",
-                                                                            cursor:
-                                                                                "pointer",
-                                                                            fontSize:
-                                                                                "12px",
-                                                                            fontWeight:
-                                                                                600
-                                                                        }}
-                                                                    >
-                                                                        <Check
-                                                                            size={
-                                                                                14
-                                                                            }
-                                                                        />
-
-                                                                        Approve
-                                                                    </button>
-
-
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() =>
-                                                                            handleStatusChange(
-                                                                                leave.id,
-                                                                                "Rejected"
-                                                                            )
-                                                                        }
-                                                                        style={{
-                                                                            display:
-                                                                                "inline-flex",
-                                                                            alignItems:
-                                                                                "center",
-                                                                            gap:
-                                                                                "5px",
-                                                                            border:
-                                                                                "none",
-                                                                            background:
-                                                                                "#FEE2E2",
-                                                                            color:
-                                                                                "#991B1B",
-                                                                            padding:
-                                                                                "7px 10px",
-                                                                            borderRadius:
-                                                                                "7px",
-                                                                            cursor:
-                                                                                "pointer",
-                                                                            fontSize:
-                                                                                "12px",
-                                                                            fontWeight:
-                                                                                600
-                                                                        }}
-                                                                    >
-                                                                        <X
-                                                                            size={
-                                                                                14
-                                                                            }
-                                                                        />
-
-                                                                        Reject
-                                                                    </button>
-
-                                                                </div>
-
-                                                            ) : (
-
-                                                                <span
-                                                                    style={{
-                                                                        color:
-                                                                            "#94A3B8",
-                                                                        fontSize:
-                                                                            "12px"
-                                                                    }}
-                                                                >
-                                                                    No
-                                                                    actions
-                                                                </span>
-
-                                                            )
-                                                        }
-
-                                                    </td>
-
-                                                </tr>
-
-                                            );
-                                        }
-                                    )
-
-                                )}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                )}
-
-            </Card>
-
-
-            {/* ===================================================== */}
-            {/* ADD LEAVE MODAL */}
-            {/* ===================================================== */}
-
-            {modalOpen && (
-
-                <div
-                    style={{
-                        position:
-                            "fixed",
-                        inset: 0,
-                        background:
-                            "rgba(15, 23, 42, 0.45)",
-                        display:
-                            "flex",
-                        alignItems:
-                            "center",
-                        justifyContent:
-                            "center",
-                        padding:
-                            "20px",
-                        zIndex: 9999
-                    }}
-                    onMouseDown={(event) => {
-                        if (
-                            event.target ===
-                            event.currentTarget
-                        ) {
-                            handleCloseModal();
-                        }
-                    }}
-                >
-
-                    <div
-                        style={{
-                            width:
-                                "100%",
-                            maxWidth:
-                                "520px",
-                            background:
-                                "#FFFFFF",
-                            borderRadius:
-                                "16px",
-                            padding:
-                                "28px",
-                            boxSizing:
-                                "border-box",
-                            boxShadow:
-                                "0 20px 50px rgba(15, 23, 42, 0.20)"
-                        }}
-                        onMouseDown={(event) =>
-                            event.stopPropagation()
-                        }
-                    >
-
-                        <h2
-                            style={{
-                                margin:
-                                    "0 0 6px",
-                                color:
-                                    "#0F172A",
-                                fontSize:
-                                    "22px"
-                            }}
-                        >
-                            Add Leave Request
-                        </h2>
-
-                        <p
-                            style={{
-                                margin:
-                                    "0 0 24px",
-                                color:
-                                    "#64748B",
-                                fontSize:
-                                    "14px"
-                            }}
-                        >
-                            Create a new employee
-                            leave request.
-                        </p>
-
-
-                        <form
-                            onSubmit={
-                                handleSubmit
-                            }
-                        >
-
-                            {/* Employee */}
-
-                            <label
-                                style={
-                                    labelStyle
-                                }
-                            >
-                                Employee
-                            </label>
-
-                            <select
-                                name="employeeId"
-                                value={
-                                    formData.employeeId
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                style={
-                                    inputStyle
-                                }
-                                required
-                            >
-
-                                <option value="">
-                                    Select employee
-                                </option>
-
-                                {employees.map(
-                                    (employee) => (
-                                        <option
-                                            key={
-                                                employee.id
-                                            }
-                                            value={
-                                                employee.id
-                                            }
-                                        >
-                                            {
-                                                employee.name
-                                            }
-                                        </option>
-                                    )
-                                )}
-
-                            </select>
-
-
-                            {/* From Date */}
-
-                            <label
-                                style={
-                                    labelStyle
-                                }
-                            >
-                                From Date
-                            </label>
-
-                            <input
-                                type="date"
-                                name="fromDate"
-                                value={
-                                    formData.fromDate
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                style={
-                                    inputStyle
-                                }
-                                required
-                            />
-
-
-                            {/* To Date */}
-
-                            <label
-                                style={
-                                    labelStyle
-                                }
-                            >
-                                To Date
-                            </label>
-
-                            <input
-                                type="date"
-                                name="toDate"
-                                value={
-                                    formData.toDate
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                style={
-                                    inputStyle
-                                }
-                                required
-                            />
-
-
-                            {/* Reason */}
-
-                            <label
-                                style={
-                                    labelStyle
-                                }
-                            >
-                                Reason
-                            </label>
-
-                            <textarea
-                                name="reason"
-                                value={
-                                    formData.reason
-                                }
-                                onChange={
-                                    handleChange
-                                }
-                                placeholder="Enter reason for leave..."
-                                rows="4"
-                                style={{
-                                    ...inputStyle,
-                                    resize:
-                                        "vertical",
-                                    minHeight:
-                                        "100px"
-                                }}
-                                required
-                            />
-
-
-                            {/* Buttons */}
-
-                            <div
-                                style={{
-                                    display:
-                                        "flex",
-                                    justifyContent:
-                                        "flex-end",
-                                    gap:
-                                        "10px",
-                                    marginTop:
-                                        "24px"
-                                }}
-                            >
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        handleCloseModal
-                                    }
-                                    disabled={
-                                        saving
-                                    }
-                                    style={{
-                                        padding:
-                                            "10px 18px",
-                                        borderRadius:
-                                            "8px",
-                                        border:
-                                            "1px solid #CBD5E1",
-                                        background:
-                                            "#FFFFFF",
-                                        color:
-                                            "#334155",
-                                        cursor:
-                                            saving
-                                                ? "not-allowed"
-                                                : "pointer",
-                                        fontWeight:
-                                            600
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-
-
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        saving
-                                    }
-                                    style={{
-                                        padding:
-                                            "10px 18px",
-                                        borderRadius:
-                                            "8px",
-                                        border:
-                                            "none",
-                                        background:
-                                            "#2563EB",
-                                        color:
-                                            "#FFFFFF",
-                                        cursor:
-                                            saving
-                                                ? "not-allowed"
-                                                : "pointer",
-                                        fontWeight:
-                                            600,
-                                        opacity:
-                                            saving
-                                                ? 0.7
-                                                : 1
-                                    }}
-                                >
-                                    {saving
-                                        ? "Saving..."
-                                        : "Submit Leave"}
-                                </button>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                </div>
+            <div
+            style={{
+            display:"flex",
+            flexDirection:"column",
+            gap:"28px"
+            }}
+            >
+
+            <Card
+            style={{
+            padding:"28px",
+            borderRadius:"18px"
+            }}
+            >
+
+            <div
+            style={{
+            display:"flex",
+            justifyContent:"space-between",
+            alignItems:"center",
+            marginBottom:"28px"
+            }}
+            >
+
+            <div>
+
+            <h2
+            style={{
+            margin:0,
+            fontSize:"30px",
+            color:"var(--text-primary)"
+            }}
+            >
+            Leave Requests
+            </h2>
+
+            <p
+            style={{
+            marginTop:"8px",
+            color:"var(--text-secondary)"
+            }}
+            >
+            Manage all employee leave requests.
+            </p>
+
+            </div>
+
+            <Button
+            variant="primary"
+            onClick={()=>{
+            setSelectedLeave(null);
+            setIsModalOpen(true);
+            }}
+            >
+
+            <Plus size={18}/>
+
+            <span className="button-text">
+            Apply Leave
+            </span>
+
+            </Button>
+
+            </div>
+
+            <div
+            style={{
+            display:"flex",
+            justifyContent:"space-between",
+            alignItems:"center",
+            marginBottom:"26px",
+            gap:"20px"
+            }}
+            >
+
+            <div
+            style={{
+            position:"relative",
+            width:"340px"
+            }}
+            >
+
+            <Search
+            size={18}
+            style={{
+            position:"absolute",
+            left:"16px",
+            top:"50%",
+            transform:"translateY(-50%)",
+            color:"var(--text-secondary)"
+            }}
+            />
+
+            <Input
+            placeholder="Search leave..."
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
+            style={{
+            paddingLeft:"46px"
+            }}
+            />
+
+            </div>
+
+            <select
+
+            value={statusFilter}
+
+            onChange={(e)=>setStatusFilter(e.target.value)}
+
+            style={{
+
+            height:"46px",
+
+            minWidth:"180px",
+
+            borderRadius:"12px",
+
+            border:"1px solid var(--border-color)",
+
+            background:"var(--card)",
+
+            color:"var(--text-primary)",
+
+            padding:"0 14px"
+
+            }}
+
+            >
+
+            <option value="All">All Status</option>
+
+            <option value="Pending">Pending</option>
+
+            <option value="Approved">Approved</option>
+
+            <option value="Rejected">Rejected</option>
+
+            </select>
+
+            </div>
+
+            {error &&
+
+            <div
+            style={{
+            padding:"14px",
+            background:"#FEE2E2",
+            color:"#DC2626",
+            borderRadius:"12px",
+            marginBottom:"20px"
+            }}
+            >
+            {error}
+            </div>
+
+            }
+
+            <div
+            style={{
+            overflowX:"auto"
+            }}
+            >
+
+            <table
+            style={{
+            width:"100%",
+            borderCollapse:"collapse"
+            }}
+            >
+
+            <thead>
+
+            <tr>
+
+            <th style={thStyle}>Employee</th>
+
+            <th style={thStyle}>From</th>
+
+            <th style={thStyle}>To</th>
+
+            <th style={thStyle}>Reason</th>
+
+            <th style={thStyle}>Status</th>
+
+            <th style={thStyle}>Actions</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+            {loading ? (
+
+            <tr>
+
+            <td
+            colSpan="6"
+            style={{
+            textAlign:"center",
+            padding:"50px",
+            color:"var(--text-secondary)"
+            }}
+            >
+            Loading leave requests...
+            </td>
+
+            </tr>
+
+            ) : filteredLeaves.length===0 ? (
+
+            <tr>
+
+            <td
+            colSpan="6"
+            style={{
+            padding:"70px 20px",
+            textAlign:"center"
+            }}
+            >
+
+            <h3
+            style={{
+            marginBottom:"10px",
+            color:"var(--text-primary)"
+            }}
+            >
+            No Leave Requests
+            </h3>
+
+            <p
+            style={{
+            color:"var(--text-secondary)"
+            }}
+            >
+            No leave requests found.
+            </p>
+
+            </td>
+
+            </tr>
+
+            ) : (
+
+            filteredLeaves.map((leave)=>(
+
+            <tr
+            key={leave.id}
+            style={{
+            borderBottom:"1px solid var(--border-color)"
+            }}
+            >
+
+            <td
+            style={tdStyle}
+            >
+
+            <div
+            style={{
+            display:"flex",
+            alignItems:"center",
+            gap:"14px"
+            }}
+            >
+
+            <Avatar
+            name={leave.employeeName}
+            />
+
+            <div>
+
+            <h4
+            style={{
+            margin:0,
+            fontSize:"15px"
+            }}
+            >
+            {leave.employeeName}
+            </h4>
+
+            <span
+            style={{
+            fontSize:"13px",
+            color:"var(--text-secondary)"
+            }}
+            >
+            Employee #{leave.employeeId}
+            </span>
+
+            </div>
+
+            </div>
+
+            </td>
+
+            <td style={tdStyle}>
+            {formatDate(leave.fromDate)}
+            </td>
+
+            <td style={tdStyle}>
+            {formatDate(leave.toDate)}
+            </td>
+
+            <td style={tdStyle}>
+            {leave.reason}
+            </td>
+
+            <td style={tdStyle}>
+
+            <Badge
+            variant={
+            leave.status==="Approved"
+            ? "success"
+            : leave.status==="Rejected"
+            ? "danger"
+            : "warning"
+            }
+            >
+
+            {leave.status}
+
+            </Badge>
+
+            </td>
+
+            <td style={tdStyle}>
+
+            <div
+            style={{
+            display:"flex",
+            gap:"10px"
+            }}
+            >
+
+            <IconButton
+            variant="primary"
+            onClick={()=>{
+            setSelectedLeave(leave);
+            setIsModalOpen(true);
+            }}
+            >
+
+            <Pencil size={16}/>
+
+            </IconButton>
+
+            <IconButton
+            variant="danger"
+                        onClick={async()=>{
+                            if(!window.confirm("Delete this leave request?"))
+                                return;
+                            try{
+                            await deleteLeaveRequest(leave.id);
+                                loadLeaveRequests();}
+                            catch(err){
+                                setError(
+                                    err?.response?.data?.message ||
+                                    "Failed to delete leave request." );
+                            }}}
+            >
+
+            <Trash2 size={16}/>
+
+            </IconButton>
+
+            </div>
+
+            </td>
+
+            </tr>
+
+            ))
 
             )}
 
-        </DashboardLayout>
-    );
-}
+            </tbody>
 
+            </table>
 
-/* ============================================================= */
-/* STYLES */
-/* ============================================================= */
+            </div>
 
-const headerStyle = {
-    textAlign: "left",
-    padding: "0 14px 14px 0",
-    color: "#94A3B8",
-    fontSize: "12px",
-    fontWeight: 600,
-    textTransform: "uppercase",
-    borderBottom:
-        "1px solid #E2E8F0"
-};
+            </Card>
 
+            <ApplyLeaveModal
+                isOpen={isModalOpen}
+                onClose={() => {
 
-const cellStyle = {
-    padding: "16px 14px 16px 0",
-    color: "#475569",
-    fontSize: "14px",
-    borderBottom:
-        "1px solid #F1F5F9"
-};
+                    setIsModalOpen(false);
+                    setSelectedLeave(null);
 
+                }}
+                leave={selectedLeave}
+                onSubmit={handleSubmit}
+            />
 
-const labelStyle = {
-    display: "block",
-    marginBottom: "7px",
-    color: "#334155",
-    fontSize: "13px",
-    fontWeight: 600
-};
+            </div>
 
+            </DashboardLayout>
 
-const inputStyle = {
-    width: "100%",
-    height: "44px",
-    boxSizing: "border-box",
-    marginBottom: "18px",
-    padding: "0 12px",
-    border:
-        "1px solid #CBD5E1",
-    borderRadius: "8px",
-    background: "#FFFFFF",
-    color: "#0F172A",
-    fontSize: "14px",
-    outline: "none"
-};
+            );
 
+            }
 
-export default Leave;
+            const thStyle={
+
+            textAlign:"left",
+
+            padding:"18px",
+
+            fontWeight:600,
+
+            fontSize:"14px",
+
+            borderBottom:"1px solid var(--border-color)",
+
+            color:"var(--text-secondary)"
+
+            };
+
+            const tdStyle={
+
+            padding:"18px",
+
+            fontSize:"14px",
+
+            color:"var(--text-primary)"
+
+            };
+
+            export default Leave;

@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Employees from "./pages/Employees/Employees";
 import Attendance from "./pages/Attendance/Attendance";
 import Leave from "./pages/Leave/Leave";
+import Settings from "./pages/Settings/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -51,6 +52,13 @@ function App() {
                             <Leave />
                         </ProtectedRoute>
                     }
+                />
+                <Route
+                    path="/settings"
+                    element={
+                    <ProtectedRoute>
+                        <Settings />
+                    </ProtectedRoute>}
                 />
 
                 {/* Default */}
