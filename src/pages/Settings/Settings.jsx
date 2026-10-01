@@ -1,25 +1,26 @@
-import { useState } from "react";
-
-import {
-    User,
-    Palette,
-    Bell,
-    Shield,
-    Info
-} from "lucide-react";
-
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
-
 import Card from "../../components/atoms/Card";
 import Input from "../../components/atoms/Input";
 import Button from "../../components/atoms/Button";
+import { Palette , Bell , Shield , User , Info} from "lucide-react";
+import {
+    getProfile,
+    updateProfile,
+    changePassword
+} from "../../services/authService";
 function Settings() {
 
     const [profile, setProfile] = useState({
-        name: localStorage.getItem("username") || "",
-        email: localStorage.getItem("email") || "",
-        role: localStorage.getItem("role") || "Administrator",
-        phone: ""
+        username: "",
+        email: "",
+        role: ""
+    });
+
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
     });
 
     const [notifications, setNotifications] = useState({
@@ -28,32 +29,59 @@ function Settings() {
         leave: true
     });
 
-    const [password, setPassword] = useState({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-    });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    const loadProfile = async () => {
+        try {
+
+            setLoading(true);
+
+            const response = await getProfile();
+
+            const data = response.data ?? response;
+
+            setProfile({
+                username: data.username ?? "",
+                email: data.email ?? "",
+                role: data.role ?? ""
+            });
+
+        }
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.response?.data?.message ||
+                "Failed to load profile."
+            );
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
+    };
 
     const handleProfileChange = (e) => {
 
         setProfile({
-
             ...profile,
-
             [e.target.name]: e.target.value
-
         });
 
     };
 
     const handlePasswordChange = (e) => {
 
-        setPassword({
-
-            ...password,
-
+        setPasswordData({
+            ...passwordData,
             [e.target.name]: e.target.value
-
         });
 
     };
@@ -61,32 +89,129 @@ function Settings() {
     const handleNotificationChange = (e) => {
 
         setNotifications({
-
             ...notifications,
-
             [e.target.name]: e.target.checked
-
         });
 
     };
 
-    const saveProfile = () => {
+    const saveProfile = async () => {
 
-        alert("Profile updated successfully.");
+        try {
+
+            setLoading(true);
+
+            const response = await updateProfile({
+                username: profile.username,
+                email: profile.email
+            });
+
+            const existingUser = JSON.parse(
+                localStorage.getItem("user") || "{}"
+            );
+
+            existingUser.username = profile.username;
+            existingUser.email = profile.email;
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(existingUser)
+            );
+            window.dispatchEvent(new Event("storage"));
+            alert(
+                response.message ||
+                "Profile updated successfully."
+            );
+
+        }
+        catch (error) {
+
+            alert(
+                error.response?.data?.message ||
+                "Profile update failed."
+            );
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
 
     };
 
-    const updatePassword = () => {
+    const updatePassword = async () => {
 
-        if (password.newPassword !== password.confirmPassword) {
+        if (!passwordData.currentPassword) {
 
-            alert("Passwords do not match.");
+            alert("Please enter current password.");
 
             return;
 
         }
 
-        alert("Password updated successfully.");
+        if (!passwordData.newPassword) {
+
+            alert("Please enter new password.");
+
+            return;
+
+        }
+
+        if (
+            passwordData.newPassword !==
+            passwordData.confirmPassword
+        ) {
+
+            alert(
+                "New Password and Confirm Password do not match."
+            );
+
+            return;
+
+        }
+
+        try {
+
+            setLoading(true);
+
+            const response = await changePassword({
+
+                currentPassword:
+                    passwordData.currentPassword,
+
+                newPassword:
+                    passwordData.newPassword
+
+            });
+
+            alert(
+                response.message ||
+                "Password updated successfully."
+            );
+
+            setPasswordData({
+
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+
+            });
+
+        }
+        catch (error) {
+
+            alert(
+                error.response?.data?.message ||
+                "Password update failed."
+            );
+
+        }
+        finally {
+
+            setLoading(false);
+
+        }
 
     };
 
@@ -137,7 +262,7 @@ function Settings() {
                                     fontSize: "14px"
                                 }}
                             >
-                                Manage your account information.
+                                Update your account information.
                             </p>
 
                         </div>
@@ -154,14 +279,14 @@ function Settings() {
                     >
 
                         <Input
-                            label="Full Name"
-                            name="name"
-                            value={profile.name}
+                            label="Username"
+                            name="username"
+                            value={profile.username}
                             onChange={handleProfileChange}
                         />
 
                         <Input
-                            label="Email Address"
+                            label="Email"
                             name="email"
                             value={profile.email}
                             onChange={handleProfileChange}
@@ -171,14 +296,6 @@ function Settings() {
                             label="Role"
                             value={profile.role}
                             disabled
-                        />
-
-                        <Input
-                            label="Phone Number"
-                            name="phone"
-                            placeholder="Enter phone number"
-                            value={profile.phone}
-                            onChange={handleProfileChange}
                         />
 
                     </div>
@@ -191,10 +308,15 @@ function Settings() {
                         }}
                     >
 
-                        <Button onClick={saveProfile}>
-
-                            Save Changes
-
+                        <Button
+                            onClick={saveProfile}
+                            disabled={loading}
+                        >
+                            {
+                                loading
+                                    ? "Saving..."
+                                    : "Save Changes"
+                            }
                         </Button>
 
                     </div>
@@ -524,7 +646,7 @@ function Settings() {
                                     margin: 0
                                 }}
                             >
-                                Security
+                                Change Password
                             </h2>
 
                             <p
@@ -534,7 +656,7 @@ function Settings() {
                                     fontSize: "14px"
                                 }}
                             >
-                                Change your account password.
+                                Keep your account secure by updating your password.
                             </p>
 
                         </div>
@@ -554,24 +676,27 @@ function Settings() {
                             label="Current Password"
                             type="password"
                             name="currentPassword"
-                            value={password.currentPassword}
+                            value={passwordData.currentPassword}
                             onChange={handlePasswordChange}
+                            placeholder="Enter current password"
                         />
 
                         <Input
                             label="New Password"
                             type="password"
                             name="newPassword"
-                            value={password.newPassword}
+                            value={passwordData.newPassword}
                             onChange={handlePasswordChange}
+                            placeholder="Enter new password"
                         />
 
                         <Input
                             label="Confirm Password"
                             type="password"
                             name="confirmPassword"
-                            value={password.confirmPassword}
+                            value={passwordData.confirmPassword}
                             onChange={handlePasswordChange}
+                            placeholder="Confirm new password"
                         />
 
                     </div>
@@ -586,8 +711,13 @@ function Settings() {
 
                         <Button
                             onClick={updatePassword}
+                            disabled={loading}
                         >
-                            Update Password
+                            {
+                                loading
+                                    ? "Updating..."
+                                    : "Update Password"
+                            }
                         </Button>
 
                     </div>

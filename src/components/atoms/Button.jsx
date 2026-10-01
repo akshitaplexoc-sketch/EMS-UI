@@ -12,9 +12,9 @@ function Button({
 }) {
     const variants = {
         primary: {
-            backgroundColor: "#6366F1",
+            backgroundColor: "#000000",
             color: "#FFFFFF",
-            border: "1px solid #6366F1"
+            border: "1px solid #f6f6fc"
         },
 
         secondary: {

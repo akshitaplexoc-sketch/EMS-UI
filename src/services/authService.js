@@ -39,3 +39,18 @@ export const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 };
+
+export const getProfile = async () => {
+    const response = await api.get("/Auth/profile");
+    return response.data;
+};
+
+export const updateProfile = async (data) => {
+    const response = await api.put("/Auth/profile", data);
+    return response.data;
+};
+
+export const changePassword = async (data) => {
+    const response = await api.put("/Auth/change-password",data );
+    return response.data;
+};

@@ -7,7 +7,7 @@ import {
     Settings,
     UserCircle
 } from "lucide-react";
-
+import { useEffect, useState } from "react";
 function Sidebar() {
 
     const menuItems = [
@@ -38,9 +38,34 @@ function Sidebar() {
         }
     ];
 
-    const user = JSON.parse(
-        localStorage.getItem("user") || "{}"
+    const [user, setUser] = useState(
+        JSON.parse(localStorage.getItem("user") || "{}")
     );
+
+    useEffect(() => {
+
+        const refreshUser = () => {
+
+            setUser(
+                JSON.parse(
+                    localStorage.getItem("user") || "{}"
+                )
+            );
+
+        };
+
+        window.addEventListener("storage", refreshUser);
+
+        return () => {
+
+            window.removeEventListener(
+                "storage",
+                refreshUser
+            );
+
+        };
+
+    }, []);
 
     const username = user?.username || "Administrator";
     const role = user?.role || "Admin";
