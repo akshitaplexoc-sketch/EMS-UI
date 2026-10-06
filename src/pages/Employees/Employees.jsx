@@ -18,6 +18,10 @@ import {
 function Employees() {
     const [employees, setEmployees] = useState([]);
     const [search, setSearch] = useState("");
+    const [pageNumber, setPageNumber] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
 
     const [loading, setLoading] = useState(true);
 
@@ -28,17 +32,14 @@ function Employees() {
         try {
             setLoading(true);
 
-            const data = await getEmployees();
+            const data = await getEmployees(pageNumber, pageSize);
 
-            setEmployees(
-                Array.isArray(data) ? data : []
-            );
+            setEmployees(data.items);
+            setTotalPages(data.totalPages);
+            setTotalRecords(data.totalRecords);
         } catch (error) {
-            console.error(
-                "Failed to load employees:",
-                error
-            );
-
+            console.error(error);
+               
             setEmployees([]);
         } finally {
             setLoading(false);
@@ -47,7 +48,7 @@ function Employees() {
 
     useEffect(() => {
         loadEmployees();
-    }, []);
+    }, [pageNumber]);
 
     const filteredEmployees = useMemo(() => {
         const searchValue = search
@@ -189,7 +190,7 @@ function Employees() {
                                 fontSize: "14px"
                             }}
                         >
-                            {employees.length} employees
+                            {totalRecords} employees
                         </p>
                     </div>
 
@@ -401,6 +402,33 @@ function Employees() {
                 onClose={handleCloseModal}
                 onSubmit={handleSubmitEmployee}
             />
+            {/* Pagination */}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "24px"
+                }}
+            >
+                <Button
+                    disabled={pageNumber === 1}
+                    onClick={() => setPageNumber(pageNumber - 1)}
+                >
+                    Previous
+                </Button>
+
+                <span>
+                    Page {pageNumber} of {totalPages}
+                </span>
+
+                <Button
+                    disabled={pageNumber === totalPages}
+                    onClick={() => setPageNumber(pageNumber + 1)}
+                >
+                    Next
+                </Button>
+            </div>
         </DashboardLayout>
     );
 }

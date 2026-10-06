@@ -1,9 +1,9 @@
 import api from "./api";
 
-export const getEmployees = async () => {
-    const response = await api.get("/Employees");
-
-    return response.data?.data || [];
+export const getEmployees = async (pageNumber = 1, pageSize = 5) => {
+    const response = await api.get(`/Employees?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+    // return response.data?.data || [];
+    return response.data.data;
 };
 
 export const getEmployeeById = async (id) => {

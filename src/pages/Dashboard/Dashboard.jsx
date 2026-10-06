@@ -36,64 +36,51 @@ function Dashboard() {
 
     const loadDashboard = async () => {
 
-        try {
+    try {
 
-            setLoading(true);
+        setLoading(true);
 
-            const employeeResponse = await getEmployees();
+        const employeeResponse = await getEmployees(1,10);
+        const attendanceResponse = await getAttendance();
 
-            const attendanceResponse = await getAttendance();
+        console.log("Employee Response:", employeeResponse);
+        console.log("Attendance Response:", attendanceResponse);
 
+        /*
+            employeeResponse now contains:
+            {
+                items: [],
+                pageNumber: 1,
+                pageSize: 5,
+                totalRecords: 8,
+                totalPages: 2
+            }
+        */
 
-            console.log(
-                "Employee Response:",
-                employeeResponse
-            );
+        setEmployees(employeeResponse?.items || []);
 
-            console.log(
-                "Attendance Response:",
-                attendanceResponse
-            );
+        setAttendance(
+            Array.isArray(attendanceResponse)
+                ? attendanceResponse
+                : attendanceResponse?.data || []
+        );
 
+    }
+    catch (error) {
 
-            /*
-                Your services are already returning
-                the arrays.
+        console.error("Failed to load dashboard:", error);
 
-                Therefore we directly store them.
-            */
+        setEmployees([]);
+        setAttendance([]);
 
-            setEmployees(
-                Array.isArray(employeeResponse)
-                    ? employeeResponse
-                    : employeeResponse?.data || []
-            );
+    }
+    finally {
 
+        setLoading(false);
 
-            setAttendance(
-                Array.isArray(attendanceResponse)
-                    ? attendanceResponse
-                    : attendanceResponse?.data || []
-            );
+    }
 
-
-        } catch (error) {
-
-            console.error(
-                "Failed to load dashboard:",
-                error
-            );
-
-            setEmployees([]);
-            setAttendance([]);
-
-        } finally {
-
-            setLoading(false);
-
-        }
-
-    };
+};
 
 
     /*
