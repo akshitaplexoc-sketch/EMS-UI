@@ -18,10 +18,16 @@ import {
 function Employees() {
     const [employees, setEmployees] = useState([]);
     const [search, setSearch] = useState("");
+
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize, setPageSize] = useState(5);
+
     const [totalPages, setTotalPages] = useState(1);
     const [totalRecords, setTotalRecords] = useState(0);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("id");
+    const [isAscending, setIsAscending] = useState(true);
 
     const [loading, setLoading] = useState(true);
 
@@ -32,23 +38,40 @@ function Employees() {
         try {
             setLoading(true);
 
-            const data = await getEmployees(pageNumber, pageSize);
+        const response = await getEmployees(
+            pageNumber,
+            pageSize,
+            searchTerm,
+            sortBy,
+            isAscending
+        );
 
-            setEmployees(data.items);
-            setTotalPages(data.totalPages);
-            setTotalRecords(data.totalRecords);
+        console.log(response);
+
+        setEmployees(response.data.items || []);
+
+        setTotalPages(response.data.totalPages);
+
+        setTotalRecords(response.data.totalRecords);
+        
         } catch (error) {
+
             console.error(error);
                
-            setEmployees([]);
         } finally {
+
             setLoading(false);
         }
     };
 
     useEffect(() => {
         loadEmployees();
-    }, [pageNumber]);
+    }, [pageNumber,
+        pageSize,
+        searchTerm,
+        sortBy,
+        isAscending
+    ]);
 
     const filteredEmployees = useMemo(() => {
         const searchValue = search

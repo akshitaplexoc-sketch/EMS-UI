@@ -57,7 +57,7 @@ function Dashboard() {
             }
         */
 
-        setEmployees(employeeResponse?.items || []);
+        setEmployees(employeeResponse.data.items || []);
 
         setAttendance(
             Array.isArray(attendanceResponse)

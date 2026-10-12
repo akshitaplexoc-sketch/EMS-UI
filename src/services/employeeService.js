@@ -1,9 +1,17 @@
 import api from "./api";
 
-export const getEmployees = async (pageNumber = 1, pageSize = 5) => {
-    const response = await api.get(`/Employees?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+export const getEmployees = async (pageNumber = 1, pageSize = 5, searchTerm = "", sortBy="id" , isAscending=true) => {
+    const response = await api.get(`/Employees`, {
+        params: {
+            pageNumber,
+            pageSize,
+            searchTerm,
+            sortBy,
+            isAscending
+        }
+    });
     // return response.data?.data || [];
-    return response.data.data;
+    return response.data;
 };
 
 export const getEmployeeById = async (id) => {

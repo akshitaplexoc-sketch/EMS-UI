@@ -338,26 +338,29 @@ function Attendance() {
     }, [selectedDate]);
 
 
-    const loadEmployees =
-        async () => {
-            try {
-                const data =
-                    await getEmployees();
+    const loadEmployees = async () => {
 
-                setEmployees(
-                    Array.isArray(data)
-                        ? data
-                        : []
-                );
-            } catch (error) {
-                console.error(
-                    "Failed to load employees:",
-                    error
-                );
+        try {
 
-                setEmployees([]);
-            }
-        };
+            const response = await getEmployees(1,10);
+
+            console.log("Employee Response:", response);
+
+            setEmployees(response.data?.items || []);
+
+        }
+        catch (error) {
+
+            console.error(
+                "Failed to load employees:",
+                error
+            );
+
+            setEmployees([]);
+
+        }
+
+    };
 
 
     const loadAttendance =
