@@ -12,25 +12,32 @@ function Login() {
     const [error, setError] = useState("");
 
     const handleLogin = async (formData) => {
-        try {
-            setLoading(true);
-            setError("");
+    try {
+        setLoading(true);
+        setError("");
 
-            await loginService(formData);
+        const user = await loginService(formData);
 
-            navigate("/dashboard", { replace: true });
-        } catch (error) {
-            console.error("Login failed:", error);
+        console.log("Logged in user:", user);
 
-            setError(
-                error?.response?.data?.message ||
-                error?.message ||
-                "Invalid email or password."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
+        navigate("/dashboard", { replace: true });
+
+    } catch (error) {
+
+        console.error("Login failed:", error);
+
+        setError(
+            error?.response?.data?.message ||
+            error?.message ||
+            "Invalid email or password."
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+};
 
     return (
         <AuthLayout>

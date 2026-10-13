@@ -19,7 +19,10 @@ import { getAttendance } from "../../services/attendanceService";
 
 
 function Dashboard() {
+    const user = JSON.parse(localStorage.getItem("user"));
 
+    console.log(user);
+    console.log("Role:", user?.roleId);
     const [employees, setEmployees] = useState([]);
     const [attendance, setAttendance] = useState([]);
     const [loading, setLoading] = useState(true);

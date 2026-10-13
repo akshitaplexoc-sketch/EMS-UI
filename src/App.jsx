@@ -8,6 +8,7 @@ import Attendance from "./pages/Attendance/Attendance";
 import Leave from "./pages/Leave/Leave";
 import Settings from "./pages/Settings/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 function App() {
     return (
@@ -31,7 +32,9 @@ function App() {
                     path="/employees"
                     element={
                         <ProtectedRoute>
-                            <Employees />
+                            <RoleProtectedRoute allowedRoles={[1]}>
+                                <Employees />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -40,7 +43,9 @@ function App() {
                     path="/attendance"
                     element={
                         <ProtectedRoute>
-                            <Attendance />
+                            <RoleProtectedRoute allowedRoles={[1, 2]}>
+                                <Attendance />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -49,16 +54,22 @@ function App() {
                     path="/leave"
                     element={
                         <ProtectedRoute>
-                            <Leave />
+                            <RoleProtectedRoute allowedRoles={[1, 2]}>
+                                <Leave />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
+
                 <Route
                     path="/settings"
                     element={
-                    <ProtectedRoute>
-                        <Settings />
-                    </ProtectedRoute>}
+                        <ProtectedRoute>
+                            <RoleProtectedRoute allowedRoles={[1, 2]}>
+                                <Settings />
+                            </RoleProtectedRoute>
+                        </ProtectedRoute>
+                    }
                 />
 
                 {/* Default */}

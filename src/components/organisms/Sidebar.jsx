@@ -9,43 +9,18 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 function Sidebar() {
-
-    const menuItems = [
-        {
-            label: "Dashboard",
-            path: "/dashboard",
-            icon: <LayoutDashboard size={19} />
-        },
-        {
-            label: "Employees",
-            path: "/employees",
-            icon: <Users size={19} />
-        },
-        {
-            label: "Attendance",
-            path: "/attendance",
-            icon: <CalendarCheck size={19} />
-        },
-        {
-            label: "Leave",
-            path: "/leave",
-            icon: <CalendarDays size={19} />
-        },
-        {
-            label: "Settings",
-            path: "/settings",
-            icon: <Settings size={19} />
-        }
-    ];
-
     const [user, setUser] = useState(
         JSON.parse(localStorage.getItem("user") || "{}")
     );
 
+    const username = user?.username || "User";
+    const roleId = user?.roleId; // Default to Employee if not found
+    const isAdmin = roleId === 1;
+
+    const role = isAdmin ? "Admin" : "Employee";
     useEffect(() => {
 
         const refreshUser = () => {
-
             setUser(
                 JSON.parse(
                     localStorage.getItem("user") || "{}"
@@ -67,8 +42,58 @@ function Sidebar() {
 
     }, []);
 
-    const username = user?.username || "Administrator";
-    const role = user?.role || "Admin";
+
+const menuItems =
+    roleId === 1
+        ? [
+            {
+                label: "Dashboard",
+                path: "/dashboard",
+                icon: <LayoutDashboard size={19} />
+            },
+            {
+                label: "Employees",
+                path: "/employees",
+                icon: <Users size={19} />
+            },
+            {
+                label: "Attendance",
+                path: "/attendance",
+                icon: <CalendarCheck size={19} />
+            },
+            {
+                label: "Leave",
+                path: "/leave",
+                icon: <CalendarDays size={19} />
+            },
+            {
+                label: "Settings",
+                path: "/settings",
+                icon: <Settings size={19} />
+            }
+        ]
+        : [
+            {
+                label: "Dashboard",
+                path: "/dashboard",
+                icon: <LayoutDashboard size={19} />
+            },
+            {
+                label: "My Attendance",
+                path: "/attendance",
+                icon: <CalendarCheck size={19} />
+            },
+            {
+                label: "My Leave",
+                path: "/leave",
+                icon: <CalendarDays size={19} />
+            },
+            {
+                label: "Settings",
+                path: "/settings",
+                icon: <Settings size={19} />
+            }
+        ];
 
     return (
         <aside
